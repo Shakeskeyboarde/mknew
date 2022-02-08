@@ -11,8 +11,10 @@ describe('getArgumentOption', () => {
 
   test('match', () => {
     expect(getArgumentOption(['--foo', 'f', '--bar=b'], '--foo')).toBe('f');
-    expect(getArgumentOption(['--foo', 'f', '--bar=b'], '--foo', '--bar')).toBe('f');
+    expect(getArgumentOption(['--foo', 'f', '--bar=b'], '--bar')).toBe('b');
     expect(getArgumentOption(['--foo', 'f', '--bar=b'], '--bar', '--foo')).toBe('b');
+    expect(getArgumentOption(['--foo', 'f', '--bar=b'], '--foo', '--bar')).toBe('b');
+    expect(getArgumentOption(['--bar=1', '--bar=2'], '--bar')).toBe('2');
   });
 
   test('throw', () => {

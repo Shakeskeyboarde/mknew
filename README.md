@@ -17,6 +17,8 @@ npx mknew [-s <source>] [-w <workspace>] <template> <target>
 - `-w <workspace>`
   - Directory. The `<target>` path is relative to the workspace.
 
+**Note:** If the `-s` or `-w` options are used more than once, the last one wins. This is to allow shell aliases or a `package.json` scripts to set default values which can be overridden.
+
 ## Templates
 
 A template can be a single file or a whole directory. Directories are copied recursively.
