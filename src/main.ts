@@ -2,7 +2,7 @@ import nodeFs from 'node:fs/promises';
 import nodePath from 'node:path';
 import nodeAssert from 'node:assert';
 import chalk from 'chalk';
-import { getArg } from './io/getArg';
+import { getArgumentOption } from './io/getArgumentOption';
 import { printUsage } from './io/printUsage';
 import { printError } from './io/printError';
 import { printWarning } from './io/printWarning';
@@ -24,8 +24,8 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
       return;
     }
 
-    const source = getArg(args, '-s', '--source') ?? '.';
-    const workspace = getArg(args, '-w', '--workspace') ?? '.';
+    const source = getArgumentOption(args, '-s', '--source') ?? '.';
+    const workspace = getArgumentOption(args, '-w', '--workspace') ?? '.';
 
     let [template, target] = args;
 

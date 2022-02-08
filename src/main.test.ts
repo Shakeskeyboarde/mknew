@@ -4,11 +4,11 @@ import { cloneGitRepo } from './git/cloneGitRepo';
 import { printUsage } from './io/printUsage';
 import { copyTemplate } from './template/copyTemplate';
 import { main } from './main';
-import { getArg } from './io/getArg';
+import { getArgumentOption } from './io/getArgumentOption';
 import { printError } from '.';
 
 jest.mock('node:fs/promises', () => ({ rm: jest.fn() }));
-jest.mock('./io/getArg', () => ({ getArg: jest.fn() }));
+jest.mock('./io/getArgumentOption', () => ({ getArgumentOption: jest.fn() }));
 jest.mock('./io/printUsage', () => ({ printUsage: jest.fn() }));
 jest.mock('./io/printError', () => ({ printError: jest.fn() }));
 jest.mock('./io/printWarning', () => ({ printWarning: jest.fn() }));
@@ -47,7 +47,7 @@ describe('main', () => {
   });
 
   test('local with source and workspace', async () => {
-    (getArg as jest.Mock).mockReturnValueOnce('foo').mockReturnValueOnce('bar');
+    (getArgumentOption as jest.Mock).mockReturnValueOnce('foo').mockReturnValueOnce('bar');
     await main(['template', 'target']);
     expect(copyTemplate).toHaveBeenCalledWith('foo/template', 'bar/target', expect.any(Function));
   });
