@@ -19,6 +19,11 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
       return;
     }
 
+    if (args.includes('--version')) {
+      console.log(require('../package.json').version);
+      return;
+    }
+
     const source = getArg(args, '-s', '--source') ?? '.';
     const workspace = getArg(args, '-w', '--workspace') ?? '.';
 
