@@ -1,96 +1,115 @@
-import fsSync from 'node:fs';
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import { constants as nodeFsConst } from 'node:fs';
+import nodeFs from 'node:fs/promises';
+import nodePath from 'node:path';
 import { isText } from 'istextorbinary';
-import { getFilenames } from '../filesystem/getFilenames';
+import { runTasks } from '../utilities/runTasks';
+import { getFiles } from '../filesystem/getFiles';
 import { isExistingPath } from '../filesystem/isExistingPath';
-import { isPathExistsError } from '../filesystem/isPathExistsError';
 import { getInput } from '../io/getInput';
 import { getTemplatePlaceholders } from './getTemplatePlaceholders';
 import { getResolvedTemplateText } from './getResolvedTemplateText';
+import { isSystemError } from '../utilities/isSystemError';
 
-export async function applyTemplate(
+/**
+ * Copy all files from a template to the target.
+ */
+export async function copyTemplate(
   template: string,
   target: string,
-  onWriteFail: (error: unknown) => void,
+  onError: (error: unknown) => void = () => {},
 ): Promise<void> {
+  const prompts: string[][] = [];
   const values = new Map<string, string>();
-  const actions: (() => Promise<void>)[] = [];
-  const dirnames = new Map<string, boolean>();
+  const errorPaths = new Set<string>();
+  const readTasks: (() => Promise<void>)[] = [];
+  const writeTasks: (() => Promise<void>)[] = [];
 
-  function createAction(
-    templateFilename: string,
-    destinationFilename: string,
-    isTextFile: boolean,
-  ): () => Promise<void> {
-    return async () => {
-      const dirname = path.dirname(destinationFilename);
+  async function read(path: string): Promise<void> {
+    const destinationFilename = nodePath.join(target, path);
+    const filePrompts: string[] = [];
 
-      if (!dirnames.has(dirname)) {
-        try {
-          await fs.mkdir(dirname, { recursive: true });
-          dirnames.set(dirname, true);
-        } catch (error) {
-          dirnames.set(dirname, false);
-          onWriteFail(error);
-          return;
-        }
-      } else if (!dirnames.get(dirname)) {
-        return;
-      }
-
-      try {
-        if (isTextFile) {
-          const inText = await fs.readFile(templateFilename, 'utf-8');
-          const outText = await getResolvedTemplateText(inText, async (key) => values.get(key) ?? '');
-
-          await fs.writeFile(destinationFilename, outText, { flag: 'wx' });
-        } else {
-          await fs.copyFile(templateFilename, destinationFilename, fsSync.constants.COPYFILE_EXCL);
-        }
-      } catch (error) {
-        if (!isPathExistsError(error)) {
-          onWriteFail(error);
-        }
-      }
-    };
-  }
-
-  for await (const filename of getFilenames(template)) {
-    const destinationFilename = path.join(target, filename);
+    prompts.push(filePrompts);
 
     if (await isExistingPath(destinationFilename)) {
-      continue;
+      return;
     }
 
-    const templateFilename = path.join(template, filename);
-    const buffer = await fs.readFile(templateFilename);
-    const isTextFile = isText(templateFilename, buffer) ?? false;
+    const templateFilename = nodePath.join(template, path);
+    const buffer = await nodeFs.readFile(templateFilename);
+    let isTemplate = false;
 
-    if (isTextFile) {
+    if (isText(templateFilename, buffer)) {
       for (const { key } of getTemplatePlaceholders(buffer.toString('utf-8'))) {
-        if (values.has(key)) {
-          continue;
-        }
-
-        switch (key) {
-          case '&template':
-            values.set(key, path.parse(path.resolve(template)).name);
-            break;
-          case '&target':
-            values.set(key, path.parse(path.resolve(target)).name);
-            break;
-          default:
-            values.set(key, await getInput(key));
-            break;
-        }
+        isTemplate = true;
+        filePrompts.push(key);
       }
     }
 
-    actions.push(createAction(templateFilename, destinationFilename, isTextFile));
+    const copy = isTemplate ? copyText : copyData;
+
+    writeTasks.push(async () => copy(templateFilename, destinationFilename));
   }
 
-  for (const action of actions) {
-    await action();
+  async function resolve(prompt: string): Promise<void> {
+    if (values.has(prompt)) {
+      return;
+    }
+
+    switch (prompt) {
+      case '&template':
+        values.set(prompt, nodePath.parse(nodePath.resolve(template)).name);
+        break;
+      case '&target':
+        values.set(prompt, nodePath.parse(nodePath.resolve(target)).name);
+        break;
+      default:
+        values.set(prompt, await getInput(prompt));
+        break;
+    }
   }
+
+  async function copyData(from: string, to: string): Promise<void> {
+    await nodeFs.mkdir(nodePath.dirname(to), { recursive: true });
+    await nodeFs.copyFile(from, to, nodeFsConst.COPYFILE_EXCL);
+  }
+
+  async function copyText(from: string, to: string): Promise<void> {
+    const inText = await nodeFs.readFile(from, 'utf-8');
+    const outText = await getResolvedTemplateText(inText, async (key) => values.get(key) ?? '');
+
+    await nodeFs.mkdir(nodePath.dirname(to), { recursive: true });
+    await nodeFs.writeFile(to, outText, { flag: 'wx' });
+  }
+
+  for await (const file of getFiles(template)) {
+    readTasks.push(async () => read(file));
+  }
+
+  await runTasks(readTasks);
+
+  for (const prompt of ([] as string[]).concat(...prompts)) {
+    await resolve(prompt);
+  }
+
+  await runTasks(writeTasks, {
+    onError: async (error) => {
+      if (isSystemError(error)) {
+        if (error.code === 'EEXIST') {
+          // Ignore the error, because if a file already exists then it should be silently skipped.
+          return;
+        }
+
+        if (error.path) {
+          if (errorPaths.has(error.path)) {
+            // Ignore the error, because an error has already been thrown for the path.
+            return;
+          }
+
+          errorPaths.add(error.path);
+        }
+      }
+
+      onError(error);
+    },
+  });
 }

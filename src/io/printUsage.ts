@@ -1,6 +1,9 @@
 import { printError } from './printError';
 
-export function printUsage(error?: unknown) {
+/**
+ * Print the usage text to stdout.
+ */
+export function printUsage() {
   console.log(
     `
 Usage: tcopy <template> <target> [options]
@@ -15,8 +18,4 @@ Options:
   --help                    Print this help text
     `.trim() + '\n',
   );
-
-  if (error) {
-    printError(error);
-  }
 }

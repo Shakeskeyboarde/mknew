@@ -1,9 +1,9 @@
-import EventEmitter from 'node:events';
-import readline from 'node:readline';
+import NodeEvents from 'node:events';
+import nodeReadline from 'node:readline';
 import chalk from 'chalk';
 import { getInput } from './getInput';
 
-class MockReadline extends EventEmitter {
+class MockReadline extends NodeEvents {
   question = jest.fn<void, [message: string, callback: (value: string) => void]>();
   close = jest.fn();
 }
@@ -15,7 +15,7 @@ jest.mock('node:readline', () => {
 });
 
 describe('getInput', () => {
-  const createInterfaceMock = readline.createInterface as jest.Mock;
+  const createInterfaceMock = nodeReadline.createInterface as jest.Mock;
   let readlineMock: MockReadline;
   let logSpy: jest.SpyInstance;
 

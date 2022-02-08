@@ -1,10 +1,10 @@
-# Make New
+# Make New (mknew)
 
 Stupidly simple scaffolding.
 
-## Usage
+Recursively copy a template file or directory. Input prompts are displayed when placeholders are found in text files (eg. `{{{placeholder}}}`), and the entered value is used as a literal replacement (no escaping). Empty directories and Git ignored paths are skipped.
 
-Recursively copy a template. Empty directories are skipped. If a file or directory error occurs, the resource is skipped and the rest of the template will still be copied.
+## Usage
 
 ```bash
 npx mknew [-s <source>] [-w <workspace>] <template> <target>
@@ -13,11 +13,9 @@ npx mknew [-s <source>] [-w <workspace>] <template> <target>
 ### Options
 
 - `-s <source>`
-  - The `<template>` path is relative to this directory, or to the Git repo root if a Git URL is given.
-  - Git URLs can have a `#<commit>` suffix to indicate a branch or other ref.
-  - Git repos are "sparse cloned" (`<template>` sub-directory only) to a local temp directory, which is deleted after copying the template files.
+  - Directory or Git URL. The `<template>` path is relative to the source.
 - `-w <workspace>`
-  - The `<target>` path is relative to this directory.
+  - Directory. The `<target>` path is relative to the workspace.
 
 ## Templates
 
@@ -60,3 +58,17 @@ There are some special built-in placeholders which are replaced with generated v
   - The basename (without extension) of the template path
 - `{{{&target}}}`
   - The basename (without extension) of the target path
+
+## Git Sources
+
+If the source (`-s` option) is a Git URL, then the repository will be [sparse cloned](https://git-scm.com/docs/git-sparse-checkout) using the Git CLI, into a temporary directory which is deleted before the process exits.
+
+Supported Git URL protocols are: `ssh`, `git`, `git+ssh`, `https`, `http`, and `file`. The [scp-like](https://git-scm.com/book/en/v2/Git-on-the-Server-The-Protocols) syntax is also supported (eg. `user@server:project.git`).
+
+Git URLs can have a `#<commit>` suffix to indicate a branch or other ref.
+
+If the URL contains a `.git` extension, then any part of the path that follows it is considered to be a sub-directory of the repository (eg. `ssh://foo.com/bar.git/sub/directory`).
+
+## Why?
+
+File and directory templates should be extremely simple to setup and modify. Ideally, they should be copied from something that works, with the parts marked that need to be updated on reuse. And this is exactly what `mknew` allows. There are no configuration files, escaped values, or template branch conditions. It's just a shortcut for cut, paste, and replace.

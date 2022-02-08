@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import assert from 'node:assert';
+import nodeFs from 'node:fs/promises';
+import nodePath from 'node:path';
+import nodeAssert from 'node:assert';
 import chalk from 'chalk';
 import { getArg } from './io/getArg';
 import { printUsage } from './io/printUsage';
@@ -8,7 +8,7 @@ import { printError } from './io/printError';
 import { printWarning } from './io/printWarning';
 import { parseGitSource } from './git/parseGitSource';
 import { cloneGitRepo } from './git/cloneGitRepo';
-import { applyTemplate } from './template/copyTemplate';
+import { copyTemplate } from './template/copyTemplate';
 
 export async function main(args = process.argv.slice(2)): Promise<void> {
   const cleanupCallbacks: (() => Promise<void>)[] = [];
@@ -25,24 +25,25 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
     let [template, target] = args;
 
     try {
-      assert(template, Error('Missing <template> argument'));
-      assert(target, Error('Missing <target> argument'));
+      nodeAssert(template, Error('Missing <template> argument'));
+      nodeAssert(target, Error('Missing <target> argument'));
     } catch (error) {
-      printUsage(error);
+      printUsage();
+      printError(error);
       return;
     }
 
     const gitSource = parseGitSource(source);
-    const tempname = gitSource && (await cloneGitRepo(gitSource, template));
+    const gitTemp = gitSource && (await cloneGitRepo(gitSource, template));
 
-    if (tempname) {
-      cleanupCallbacks.push(async () => fs.rm(tempname, { recursive: true, force: true }));
+    if (gitTemp) {
+      cleanupCallbacks.push(async () => nodeFs.rm(gitTemp, { recursive: true, force: true }));
     }
 
-    template = path.join(tempname || source, template);
-    target = path.join(workspace, target);
+    template = gitTemp ? nodePath.join(gitTemp, gitSource.path ?? '', template) : nodePath.join(source, template);
+    target = nodePath.join(workspace, target);
 
-    await applyTemplate(template, target, (error) => printWarning(error instanceof Error ? error.message : error));
+    await copyTemplate(template, target, (error) => printWarning(error instanceof Error ? error.message : error));
 
     if (process.exitCode) {
       console.log(chalk.yellowBright(`Created "${target}" (with warnings)`));

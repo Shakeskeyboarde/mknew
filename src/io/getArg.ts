@@ -1,3 +1,7 @@
+/**
+ * Get the value of a command line argument. The argument will be removed from
+ * the args array.
+ */
 export function getArg(args: string[], ...flags: string[]): string | undefined {
   while (flags.length) {
     const flag = flags.shift()!;

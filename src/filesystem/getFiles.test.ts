@@ -1,6 +1,6 @@
-import fs from 'node:fs/promises';
+import nodeFs from 'node:fs/promises';
 import { getGitIgnored } from '../git/getGitIgnored';
-import { getFilenames } from './getFilenames';
+import { getFiles } from './getFiles';
 
 jest.mock('node:fs/promises', () => ({ stat: jest.fn(), readdir: jest.fn() }));
 
@@ -17,8 +17,8 @@ async function toArrayFromAsyncGen<T>(generator: AsyncGenerator<T>): Promise<T[]
 }
 
 describe('getFilenames', () => {
-  const statMock = fs.stat as jest.Mock;
-  const readdirMock = fs.readdir as jest.Mock;
+  const statMock = nodeFs.stat as jest.Mock;
+  const readdirMock = nodeFs.readdir as jest.Mock;
   const getIgnoredMock = getGitIgnored as jest.Mock;
 
   beforeEach(() => {
@@ -33,7 +33,7 @@ describe('getFilenames', () => {
       { name: 'b', isDirectory: () => false },
       { name: 'c', isDirectory: () => false },
     ]);
-    expect(await toArrayFromAsyncGen(getFilenames('root'))).toMatchInlineSnapshot(`
+    expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
   "a",
   "b",
@@ -50,7 +50,7 @@ Array [
         { name: 'c', isDirectory: () => false },
       ])
       .mockResolvedValueOnce([{ name: 'd', isDirectory: () => false }]);
-    expect(await toArrayFromAsyncGen(getFilenames('root'))).toMatchInlineSnapshot(`
+    expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
   "a",
   "c",
@@ -72,7 +72,7 @@ Array [
       ])
       .mockResolvedValueOnce([{ name: 'f', isDirectory: () => false }])
       .mockResolvedValueOnce([{ name: 'g', isDirectory: () => false }]);
-    expect(await toArrayFromAsyncGen(getFilenames('root'))).toMatchInlineSnapshot(`
+    expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
   "a",
   "b/e",
@@ -84,7 +84,7 @@ Array [
 
   test('file', async () => {
     statMock.mockResolvedValue({ isDirectory: () => false });
-    expect(await toArrayFromAsyncGen(getFilenames('root'))).toMatchInlineSnapshot(`
+    expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
   ".",
 ]

@@ -1,16 +1,21 @@
-import fs from 'node:fs/promises';
+import nodeFs from 'node:fs/promises';
 import { isExistingPath } from './isExistingPath';
 
 jest.mock('node:fs/promises');
 
 describe('isExistingPath', () => {
   test('true', async () => {
-    (fs.stat as jest.Mock).mockResolvedValue(undefined);
-    expect(await isExistingPath('foo')).toBe(true);
+    (nodeFs.stat as jest.Mock).mockResolvedValue({});
+    await expect(isExistingPath('foo')).resolves.toBe(true);
   });
 
   test('false', async () => {
-    (fs.stat as jest.Mock).mockRejectedValue(undefined);
-    expect(await isExistingPath('foo')).toBe(false);
+    (nodeFs.stat as jest.Mock).mockRejectedValue(Object.assign(Error(), { code: 'ENOENT' }));
+    await expect(isExistingPath('foo')).resolves.toBe(false);
+  });
+
+  test('throw', async () => {
+    (nodeFs.stat as jest.Mock).mockRejectedValue(Object.assign(Error()));
+    await expect(isExistingPath('foo')).rejects.toBeInstanceOf(Error);
   });
 });

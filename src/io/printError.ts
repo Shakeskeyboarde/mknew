@@ -1,6 +1,12 @@
 import chalk from 'chalk';
 
+/**
+ * Print an error message to stderr (with color).
+ * 
+ * This also sets `process.exitCode` to a value of `2` if it is not already
+ * non-zero.
+ */
 export function printError(error: unknown): void {
   console.error(chalk.redBright(`${error}`));
-  process.exitCode = 2;
+  process.exitCode = process.exitCode || 2;
 }

@@ -4,6 +4,9 @@ export interface Placeholder {
   end: number;
 }
 
+/**
+ * Find all of the placeholders in template text.
+ */
 export function* getTemplatePlaceholders(text: string): Generator<Placeholder, void> {
   const expression = /\{{3}[ \t]*([^{}\r\n \t][^{}\r\n]*?)[ \t]*\}{3}/gu;
 

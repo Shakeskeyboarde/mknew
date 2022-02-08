@@ -1,6 +1,6 @@
 {
   "name": "mknew",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Stupidly simple scaffolding.",
   "author": "Chris Ackerman",
   "license": "ISC",
@@ -21,7 +21,8 @@
     "package",
     "module",
     "bundle",
-    "tool"
+    "tool",
+    "yeoman"
   ],
   "files": [
     "lib"
@@ -29,7 +30,9 @@
   "engines": {
     "node": ">=16"
   },
-  "bin": "lib/bin.js",
+  "bin": {
+    "mknew": "lib/bin.js"
+  },
   "main": "lib/index.js",
   "scripts": {
     "test": "jest",
@@ -58,5 +61,16 @@
     "printWidth": 120,
     "singleQuote": true,
     "trailingComma": "all"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Shakeskeyboarde/mknew.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Shakeskeyboarde/mknew/issues"
+  },
+  "homepage": "https://github.com/Shakeskeyboarde/mknew#readme"
 }

@@ -1,6 +1,12 @@
 import { getTemplatePlaceholders } from './getTemplatePlaceholders';
 
-export async function getResolvedTemplateText(text: string, getReplacement: (key: string) => Promise<string>): Promise<string> {
+/**
+ * Replace all placeholders in a string.
+ */
+export async function getResolvedTemplateText(
+  text: string,
+  getReplacement: (key: string) => Promise<string>,
+): Promise<string> {
   let lastIndex = 0;
   let output = '';
 
