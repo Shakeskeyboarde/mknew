@@ -24,8 +24,8 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
       return;
     }
 
-    const source = getArgumentOption(args, '-s', '--source') ?? '.';
-    const workspace = getArgumentOption(args, '-w', '--workspace') ?? '.';
+    const source = getArgumentOption(args, '-s', '--source') || process.env.MKNEW_SOURCE || '.';
+    const workspace = getArgumentOption(args, '-w', '--workspace') || process.env.MKNEW_WORKSPACE || '.';
 
     let [template, target] = args;
 

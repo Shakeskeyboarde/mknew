@@ -9,6 +9,7 @@ import { getInput } from '../io/getInput';
 import { getTemplatePlaceholders } from './getTemplatePlaceholders';
 import { getResolvedTemplateText } from './getResolvedTemplateText';
 import { isSystemError } from '../utilities/isSystemError';
+import { getPromptKey } from './getPromptKey';
 
 /**
  * Copy all files from a template to the target.
@@ -39,9 +40,9 @@ export async function copyTemplate(
     let isTemplate = false;
 
     if (isText(templateFilename, buffer)) {
-      for (const { key } of getTemplatePlaceholders(buffer.toString('utf-8'))) {
+      for (const { prompt } of getTemplatePlaceholders(buffer.toString('utf-8'))) {
         isTemplate = true;
-        filePrompts.push(key);
+        filePrompts.push(prompt);
       }
     }
 
@@ -51,19 +52,24 @@ export async function copyTemplate(
   }
 
   async function resolve(prompt: string): Promise<void> {
-    if (values.has(prompt)) {
+    const key = getPromptKey(prompt);
+
+    if (values.has(key)) {
       return;
     }
 
-    switch (prompt) {
+    switch (key) {
       case '&template':
-        values.set(prompt, nodePath.parse(nodePath.resolve(template)).name);
+        values.set(key, nodePath.parse(nodePath.resolve(template)).name);
         break;
       case '&target':
-        values.set(prompt, nodePath.parse(nodePath.resolve(target)).name);
+        values.set(key, nodePath.parse(nodePath.resolve(target)).name);
+        break;
+      case '&year':
+        values.set(key, `${new Date().getFullYear()}`);
         break;
       default:
-        values.set(prompt, await getInput(prompt));
+        values.set(key, await getInput(prompt));
         break;
     }
   }
@@ -75,7 +81,7 @@ export async function copyTemplate(
 
   async function copyText(from: string, to: string): Promise<void> {
     const inText = await nodeFs.readFile(from, 'utf-8');
-    const outText = await getResolvedTemplateText(inText, async (key) => values.get(key) ?? '');
+    const outText = await getResolvedTemplateText(inText, async (prompt) => values.get(getPromptKey(prompt)) ?? '');
 
     await nodeFs.mkdir(nodePath.dirname(to), { recursive: true });
     await nodeFs.writeFile(to, outText, { flag: 'wx' });

@@ -7,7 +7,7 @@ import { InputInterruptError } from './InputInterruptError';
  */
 export async function getInput(message: string): Promise<string> {
   const readline = nodeReadline.createInterface(process.stdin, process.stdout);
-  const promptMessage = message.trim().replace(/[^a-z0-9]?$/iu, (match) => match || ':');
+  const promptMessage = message.trim().replace(/[=:.!?]?$/iu, (match) => match || ':');
 
   return new Promise((resolve, reject) => {
     readline.question(chalk.bold(`${promptMessage} `), (value) => {

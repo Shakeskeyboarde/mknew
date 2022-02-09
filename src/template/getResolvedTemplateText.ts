@@ -5,14 +5,14 @@ import { getTemplatePlaceholders } from './getTemplatePlaceholders';
  */
 export async function getResolvedTemplateText(
   text: string,
-  getReplacement: (key: string) => Promise<string>,
+  getReplacement: (prompt: string) => Promise<string>,
 ): Promise<string> {
   let lastIndex = 0;
   let output = '';
 
-  for await (const { key, start, end } of getTemplatePlaceholders(text)) {
+  for await (const { prompt, start, end } of getTemplatePlaceholders(text)) {
     output += text.slice(lastIndex, start);
-    output += await getReplacement(key);
+    output += await getReplacement(prompt);
     lastIndex = end;
   }
 

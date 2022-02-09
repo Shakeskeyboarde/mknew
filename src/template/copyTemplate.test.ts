@@ -257,7 +257,8 @@ Array [
   });
 
   test('built-in prompts', async () => {
-    files.set('from/a', '{{{&template}}} {{{&target}}}');
+    new Date().getFullYear();
+    files.set('from/a', '{{{&template}}} {{{&target}}} {{{&year}}}');
 
     await copyTemplate('from.foo', 'to.bar', onError);
 
@@ -266,7 +267,7 @@ Array [
 Array [
   Array [
     "from/a",
-    "from to",
+    "from to ${new Date().getFullYear()}",
     Object {
       "flag": "wx",
     },

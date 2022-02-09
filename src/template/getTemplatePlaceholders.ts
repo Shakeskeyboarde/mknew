@@ -1,5 +1,5 @@
 export interface Placeholder {
-  key: string;
+  prompt: string;
   start: number;
   end: number;
 }
@@ -14,7 +14,7 @@ export function* getTemplatePlaceholders(text: string): Generator<Placeholder, v
   let match: RegExpExecArray | null = null;
 
   while (null != (match = expression.exec(text))) {
-    yield { key: match[1], start: match.index, end: expression.lastIndex };
+    yield { prompt: match[1], start: match.index, end: expression.lastIndex };
     lastIndex = expression.lastIndex;
   }
 }

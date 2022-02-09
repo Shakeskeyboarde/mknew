@@ -19,6 +19,13 @@ npx mknew [-s <source>] [-w <workspace>] <template> <target>
 
 **Note:** If the `-s` or `-w` options are used more than once, the last one wins. This is to allow shell aliases or a `package.json` scripts to set default values which can be overridden.
 
+### Environment Variables
+
+- `MKNEW_SOURCE`
+  - Default source (`-s`) value if none is given.
+- `MKNEW_WORKSPACE`
+  - Default workspace (`-w`) value if none is given.
+
 ## Templates
 
 A template can be a single file or a whole directory. Directories are copied recursively.
@@ -60,6 +67,8 @@ There are some special built-in placeholders which are replaced with generated v
   - The basename (without extension) of the template path
 - `{{{&target}}}`
   - The basename (without extension) of the target path
+- `{{{&year}}}`
+  - The current year (4-digit, local).
 
 ## Git Sources
 
