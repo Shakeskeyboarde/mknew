@@ -39,6 +39,15 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
     }
 
     const gitSource = parseGitSource(source);
+
+    if (gitSource) {
+      console.log(
+        chalk.cyanBright(`Copying "${nodePath.posix.join(gitSource.path ?? '', template)}" (${gitSource.url})`),
+      );
+    } else {
+      console.log(chalk.cyanBright(`Copying "${nodePath.join(source, template)}"`));
+    }
+
     const gitTemp = gitSource && (await cloneGitRepo(gitSource, template));
 
     if (gitTemp) {
