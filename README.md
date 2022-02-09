@@ -69,6 +69,10 @@ There are some special built-in placeholders which are replaced with generated v
   - The basename (without extension) of the target path
 - `{{{&year}}}`
   - The current year (4-digit, local).
+- `{{{&name}}}`
+  - The Git config `user.name` value.
+- `{{{&email}}}`
+  - The Git config `user.email` value.
 
 ## Git Sources
 

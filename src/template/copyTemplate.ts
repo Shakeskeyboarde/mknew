@@ -3,12 +3,13 @@ import nodeFs from 'node:fs/promises';
 import nodePath from 'node:path';
 import { isText } from 'istextorbinary';
 import { runTasks } from '../utilities/runTasks';
+import { isSystemError } from '../utilities/isSystemError';
 import { getFiles } from '../filesystem/getFiles';
 import { isExistingPath } from '../filesystem/isExistingPath';
 import { getInput } from '../io/getInput';
+import { createGit } from '../git/createGit';
 import { getTemplatePlaceholders } from './getTemplatePlaceholders';
 import { getResolvedTemplateText } from './getResolvedTemplateText';
-import { isSystemError } from '../utilities/isSystemError';
 import { getPromptKey } from './getPromptKey';
 
 /**
@@ -67,6 +68,22 @@ export async function copyTemplate(
         break;
       case '&year':
         values.set(key, `${new Date().getFullYear()}`);
+        break;
+      case '&name':
+        values.set(
+          key,
+          await createGit(process.cwd())('config', 'user.name').catch(() => {
+            throw Error('Git user name not found');
+          }),
+        );
+        break;
+      case '&email':
+        values.set(
+          key,
+          await createGit(process.cwd())('config', 'user.email').catch(() => {
+            throw Error('Git user email not found');
+          }),
+        );
         break;
       default:
         values.set(key, await getInput(prompt));
