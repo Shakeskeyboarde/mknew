@@ -6,7 +6,7 @@ import { printError } from './printError';
 export function printUsage() {
   console.log(
     `
-Usage: mknew <template> <target> [options]
+Usage: mknew [options] <template> <target>
        mknew --version
        mknew --help
 

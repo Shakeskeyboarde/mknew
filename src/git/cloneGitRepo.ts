@@ -30,7 +30,7 @@ export async function cloneGitRepo({ url, path = '', branch }: GitSource, subPat
     if (!branch) {
       const remote = await git('remote', 'show', 'origin');
       branch = remote.match(/^\s*HEAD branch:\s*(.*)\s*$/m)?.[1];
-      nodeAssert(branch, Error('Failed to detect Git repository default branch'));
+      nodeAssert(branch, Error('failed to detect Git repository default branch'));
     }
 
     await git('fetch', '--depth=1', 'origin', branch).catch(() => {

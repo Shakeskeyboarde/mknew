@@ -4,11 +4,9 @@ import { cloneGitRepo } from './git/cloneGitRepo';
 import { printUsage } from './io/printUsage';
 import { copyTemplate } from './template/copyTemplate';
 import { main } from './main';
-import { getArgumentOption } from './io/getArgumentOption';
 import { printError } from '.';
 
 jest.mock('node:fs/promises', () => ({ rm: jest.fn() }));
-jest.mock('./io/getArgumentOption', () => ({ getArgumentOption: jest.fn() }));
 jest.mock('./io/printUsage', () => ({ printUsage: jest.fn() }));
 jest.mock('./io/printError', () => ({ printError: jest.fn() }));
 jest.mock('./io/printWarning', () => ({ printWarning: jest.fn() }));
@@ -18,6 +16,8 @@ jest.mock('./template/copyTemplate', () => ({ copyTemplate: jest.fn() }));
 
 describe('main', () => {
   beforeEach(() => {
+    jest.spyOn(console, 'log').mockReturnValue();
+    jest.spyOn(console, 'error').mockReturnValue();
     (parseGitSource as jest.Mock).mockReturnValue(null);
   });
 
@@ -29,13 +29,11 @@ describe('main', () => {
 
   test('missing template', async () => {
     await main([]);
-    expect(printUsage).toHaveBeenCalled();
     expect(printError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/template/) }));
   });
 
   test('missing target', async () => {
     await main(['template']);
-    expect(printUsage).toHaveBeenCalled();
     expect(printError).toHaveBeenCalledWith(expect.objectContaining({ message: expect.stringMatching(/target/) }));
   });
 
@@ -47,8 +45,7 @@ describe('main', () => {
   });
 
   test('local with source and workspace', async () => {
-    (getArgumentOption as jest.Mock).mockReturnValueOnce('foo').mockReturnValueOnce('bar');
-    await main(['template', 'target']);
+    await main(['-s', 'foo', '-w', 'bar', 'template', 'target']);
     expect(copyTemplate).toHaveBeenCalledWith('foo/template', 'bar/target', expect.any(Function));
   });
 

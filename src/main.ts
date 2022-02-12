@@ -2,7 +2,7 @@ import nodeFs from 'node:fs/promises';
 import nodePath from 'node:path';
 import nodeAssert from 'node:assert';
 import chalk from 'chalk';
-import { getArgumentOption } from './io/getArgumentOption';
+import arg from 'arg';
 import { printUsage } from './io/printUsage';
 import { printError } from './io/printError';
 import { printWarning } from './io/printWarning';
@@ -10,33 +10,39 @@ import { parseGitSource } from './git/parseGitSource';
 import { cloneGitRepo } from './git/cloneGitRepo';
 import { copyTemplate } from './template/copyTemplate';
 
-export async function main(args = process.argv.slice(2)): Promise<void> {
+export async function main(argv = process.argv.slice(2)): Promise<void> {
   const cleanupCallbacks: (() => Promise<void>)[] = [];
 
   try {
-    if (args.includes('--help')) {
+    const options = arg(
+      {
+        '--help': Boolean,
+        '--version': Boolean,
+        '--source': String,
+        '--workspace': String,
+        '-s': '--source',
+        '-w': '--workspace',
+      },
+      { argv },
+    );
+
+    if (options['--help']) {
       printUsage();
       return;
     }
 
-    if (args.includes('--version')) {
+    if (options['--version']) {
       console.log(require('../package.json').version);
       return;
     }
 
-    const source = getArgumentOption(args, '-s', '--source') || process.env.MKNEW_SOURCE || '.';
-    const workspace = getArgumentOption(args, '-w', '--workspace') || process.env.MKNEW_WORKSPACE || '.';
+    const source = options['--source'] || process.env.MKNEW_SOURCE || '.';
+    const workspace = options['--workspace'] || process.env.MKNEW_WORKSPACE || '.';
 
-    let [template, target] = args;
+    let [template, target] = options._;
 
-    try {
-      nodeAssert(template, Error('Missing <template> argument'));
-      nodeAssert(target, Error('Missing <target> argument'));
-    } catch (error) {
-      printUsage();
-      printError(error);
-      return;
-    }
+    nodeAssert(template, Error('missing <template> argument'));
+    nodeAssert(target, Error('missing <target> argument'));
 
     const gitSource = parseGitSource(source);
 

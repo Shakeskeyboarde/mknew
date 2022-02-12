@@ -73,7 +73,7 @@ export async function copyTemplate(
         values.set(
           key,
           await createGit(process.cwd())('config', 'user.name').catch(() => {
-            throw Error('Git user name not found');
+            throw Error('git user name not found');
           }),
         );
         break;
@@ -81,7 +81,7 @@ export async function copyTemplate(
         values.set(
           key,
           await createGit(process.cwd())('config', 'user.email').catch(() => {
-            throw Error('Git user email not found');
+            throw Error('git user email not found');
           }),
         );
         break;

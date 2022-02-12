@@ -11,6 +11,6 @@ module.exports = {
   coverageDirectory: '../out/coverage',
   coverageReporters: ['text-summary', 'html'],
   coverageThreshold: {
-    global: { statements: 75, branches: 75, function: 60, lines: 75 },
+    global: { statements: 75, branches: 70, function: 60, lines: 75 },
   },
 };

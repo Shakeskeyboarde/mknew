@@ -31,7 +31,7 @@ Array [
     expect(messages).toMatchInlineSnapshot(`
 Array [
   Array [
-    "[91mError: message[39m",
+    "[91mmessage[39m",
   ],
 ]
 `);

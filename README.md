@@ -19,9 +19,13 @@ npx mknew [-s <source>] [-w <workspace>] <template> <target>
 ### Options
 
 - `-s <source>`
-  - Directory or Git URL. The `<template>` path is relative to the source.
+  - Directory path or Git URL.
+  - The `<template>` path is relative to the source.
+  - Default: `.`
 - `-w <workspace>`
-  - Directory. The `<target>` path is relative to the workspace.
+  - Directory path.
+  - The `<target>` path is relative to the workspace.
+  - Default: `.`
 
 **Note:** If the `-s` or `-w` options are used more than once, the last one wins. This is to allow shell aliases or a `package.json` scripts to set default values which can be overridden.
 
