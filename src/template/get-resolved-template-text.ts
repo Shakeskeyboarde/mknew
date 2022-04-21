@@ -1,12 +1,12 @@
-import { getTemplatePlaceholders } from './getTemplatePlaceholders';
+import { getTemplatePlaceholders } from './get-template-placeholders';
 
 /**
  * Replace all placeholders in a string.
  */
-export async function getResolvedTemplateText(
+export const getResolvedTemplateText = async (
   text: string,
   getReplacement: (prompt: string) => Promise<string>,
-): Promise<string> {
+): Promise<string> => {
   let lastIndex = 0;
   let output = '';
 
@@ -17,4 +17,4 @@ export async function getResolvedTemplateText(
   }
 
   return output + text.slice(lastIndex);
-}
+};

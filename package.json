@@ -1,6 +1,6 @@
 {
   "name": "mknew",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Stupidly simple scaffolding.",
   "author": "Chris Ackerman",
   "license": "ISC",
@@ -35,7 +35,7 @@
   },
   "main": "lib/index.js",
   "scripts": {
-    "test": "del-cli out && jest --no-cache",
+    "test": "del-cli out && eslint src --max-warnings=0 && jest --no-cache",
     "build": "del-cli lib && tsc && chmodx --package",
     "prepack": "npm test && npm run build",
     "start": "npm --silent run build && node lib/bin.js"
@@ -53,6 +53,8 @@
     "@types/node": "^16.11.21",
     "chmodx": "^1.0.0",
     "del-cli": "^4.0.1",
+    "eslint": "^8.13.0",
+    "eslint-config-rational": "^0.1.7",
     "jest": "^27.4.7",
     "source-map-support": "^0.5.21",
     "ts-jest": "^27.1.3",

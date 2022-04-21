@@ -1,4 +1,4 @@
-import { printUsage } from './printUsage';
+import { printUsage } from './print-usage';
 
 describe('printUsage', () => {
   const logs: unknown[] = [];

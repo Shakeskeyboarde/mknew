@@ -1,4 +1,4 @@
-import { getResolvedTemplateText } from './getResolvedTemplateText';
+import { getResolvedTemplateText } from './get-resolved-template-text';
 
 describe('getResolvedTemplateText', () => {
   test('at start', async () => {
@@ -35,6 +35,12 @@ describe('getResolvedTemplateText', () => {
   test('not empty', async () => {
     expect(await getResolvedTemplateText('a{{{}}}{{{b}}}c', async (id) => id.toUpperCase())).toMatchInlineSnapshot(
       `"a{{{}}}Bc"`,
+    );
+  });
+
+  test('tildes', async () => {
+    expect(await getResolvedTemplateText('@foo/~~~.bar~~~.baz', async (id) => id.toUpperCase())).toMatchInlineSnapshot(
+      `"@foo/.BAR.baz"`,
     );
   });
 });

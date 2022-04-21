@@ -1,7 +1,7 @@
-import { parseGitSource } from './parseGitSource';
+import { parseGitSource } from './parse-git-source';
 
 describe('parseGitSource', () => {
-  const cases: [string, { url: string; branch?: string } | null][] = [
+  const cases: [string, { branch?: string; url: string } | null][] = [
     // Simple
     ['https://github.com/facebook/react.git', { url: 'https://github.com/facebook/react.git' }],
     ['https://github.com/facebook/react', { url: 'https://github.com/facebook/react' }],
@@ -16,18 +16,18 @@ describe('parseGitSource', () => {
     ['git@github.com:facebook/react.git', { url: 'git@github.com:facebook/react.git' }],
     ['git@github.com:facebook/react', { url: 'git@github.com:facebook/react' }],
     // With branch
-    ['https://github.com/facebook/react.git#foo', { url: 'https://github.com/facebook/react.git', branch: 'foo' }],
-    ['https://github.com/facebook/react#foo', { url: 'https://github.com/facebook/react', branch: 'foo' }],
-    ['http://github.com/facebook/react.git#foo', { url: 'http://github.com/facebook/react.git', branch: 'foo' }],
-    ['http://github.com/facebook/react#foo', { url: 'http://github.com/facebook/react', branch: 'foo' }],
-    ['git://github.com/facebook/react.git#foo', { url: 'git://github.com/facebook/react.git', branch: 'foo' }],
-    ['git://github.com/facebook/react#foo', { url: 'git://github.com/facebook/react', branch: 'foo' }],
-    ['ssh://github.com/facebook/react.git#foo', { url: 'ssh://github.com/facebook/react.git', branch: 'foo' }],
-    ['ssh://github.com/facebook/react#foo', { url: 'ssh://github.com/facebook/react', branch: 'foo' }],
-    ['git+ssh://github.com/facebook/react.git#foo', { url: 'git+ssh://github.com/facebook/react.git', branch: 'foo' }],
-    ['git+ssh://github.com/facebook/react#foo', { url: 'git+ssh://github.com/facebook/react', branch: 'foo' }],
-    ['git@github.com:facebook/react.git#foo', { url: 'git@github.com:facebook/react.git', branch: 'foo' }],
-    ['git@github.com:facebook/react#foo', { url: 'git@github.com:facebook/react', branch: 'foo' }],
+    ['https://github.com/facebook/react.git#foo', { branch: 'foo', url: 'https://github.com/facebook/react.git' }],
+    ['https://github.com/facebook/react#foo', { branch: 'foo', url: 'https://github.com/facebook/react' }],
+    ['http://github.com/facebook/react.git#foo', { branch: 'foo', url: 'http://github.com/facebook/react.git' }],
+    ['http://github.com/facebook/react#foo', { branch: 'foo', url: 'http://github.com/facebook/react' }],
+    ['git://github.com/facebook/react.git#foo', { branch: 'foo', url: 'git://github.com/facebook/react.git' }],
+    ['git://github.com/facebook/react#foo', { branch: 'foo', url: 'git://github.com/facebook/react' }],
+    ['ssh://github.com/facebook/react.git#foo', { branch: 'foo', url: 'ssh://github.com/facebook/react.git' }],
+    ['ssh://github.com/facebook/react#foo', { branch: 'foo', url: 'ssh://github.com/facebook/react' }],
+    ['git+ssh://github.com/facebook/react.git#foo', { branch: 'foo', url: 'git+ssh://github.com/facebook/react.git' }],
+    ['git+ssh://github.com/facebook/react#foo', { branch: 'foo', url: 'git+ssh://github.com/facebook/react' }],
+    ['git@github.com:facebook/react.git#foo', { branch: 'foo', url: 'git@github.com:facebook/react.git' }],
+    ['git@github.com:facebook/react#foo', { branch: 'foo', url: 'git@github.com:facebook/react' }],
     // Not Git URLs
     ['foo', null],
     ['foo/bar', null],

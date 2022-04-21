@@ -1,24 +1,25 @@
+import arg from 'arg';
+import chalk from 'chalk';
+import nodeAssert from 'node:assert';
 import nodeFs from 'node:fs/promises';
 import nodePath from 'node:path';
-import nodeAssert from 'node:assert';
-import chalk from 'chalk';
-import arg from 'arg';
-import { printUsage } from './io/printUsage';
-import { printError } from './io/printError';
-import { printWarning } from './io/printWarning';
-import { parseGitSource } from './git/parseGitSource';
-import { cloneGitRepo } from './git/cloneGitRepo';
-import { copyTemplate } from './template/copyTemplate';
 
-export async function main(argv = process.argv.slice(2)): Promise<void> {
+import { cloneGitRepo } from './git/clone-git-repo';
+import { parseGitSource } from './git/parse-git-source';
+import { printError } from './io/print-error';
+import { printUsage } from './io/print-usage';
+import { printWarning } from './io/print-warning';
+import { copyTemplate } from './template/copy-template';
+
+export const main = async (argv = process.argv.slice(2)): Promise<void> => {
   const cleanupCallbacks: (() => Promise<void>)[] = [];
 
   try {
     const options = arg(
       {
         '--help': Boolean,
-        '--version': Boolean,
         '--source': String,
+        '--version': Boolean,
         '--workspace': String,
         '-s': '--source',
         '-w': '--workspace',
@@ -32,6 +33,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
     }
 
     if (options['--version']) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       console.log(require('../package.json').version);
       return;
     }
@@ -41,8 +43,8 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
 
     let [template, target] = options._;
 
-    nodeAssert(template, Error('missing <template> argument'));
-    nodeAssert(target, Error('missing <target> argument'));
+    nodeAssert(template, new Error('missing <template> argument'));
+    nodeAssert(target, new Error('missing <target> argument'));
 
     const gitSource = parseGitSource(source);
 
@@ -54,13 +56,15 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       console.log(chalk.cyanBright(`Copying "${nodePath.join(source, template)}"`));
     }
 
-    const gitTemp = gitSource && (await cloneGitRepo(gitSource, template));
+    const gitTemporary = gitSource && (await cloneGitRepo(gitSource, template));
 
-    if (gitTemp) {
-      cleanupCallbacks.push(async () => nodeFs.rm(gitTemp, { recursive: true, force: true }));
+    if (gitTemporary) {
+      cleanupCallbacks.push(async () => nodeFs.rm(gitTemporary, { force: true, recursive: true }));
     }
 
-    template = gitTemp ? nodePath.join(gitTemp, gitSource.path ?? '', template) : nodePath.join(source, template);
+    template = gitTemporary
+      ? nodePath.join(gitTemporary, gitSource.path ?? '', template)
+      : nodePath.join(source, template);
     target = nodePath.join(workspace, target);
 
     await copyTemplate(template, target, (error) => printWarning(error instanceof Error ? error.message : error));
@@ -77,4 +81,4 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
       cleanup().catch(printWarning);
     }
   }
-}
+};

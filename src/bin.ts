@@ -2,7 +2,7 @@
 
 /* istanbul ignore file */
 
-Promise.resolve()
+void Promise.resolve()
   .then(async () => {
     if (process.env.NODE_ENV === 'development') {
       try {

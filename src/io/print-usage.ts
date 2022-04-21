@@ -1,9 +1,7 @@
-import { printError } from './printError';
-
 /**
  * Print the usage text to stdout.
  */
-export function printUsage() {
+export const printUsage = () => {
   console.log(
     `
 Usage: mknew [options] <template> <target>
@@ -20,4 +18,4 @@ Options:
   --help                    Print this help text
     `.trim() + '\n',
   );
-}
+};

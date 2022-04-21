@@ -1,11 +1,12 @@
 import nodePath from 'node:path';
-import { createGit } from './createGit';
+
+import { createGit } from './create-git';
 
 /**
  * List all Git ignored files (absolute paths). All files in the Git _root_ are
  * listed, even if `path` is not the root.
  */
-export async function getGitIgnored(path: string): Promise<string[]> {
+export const getGitIgnored = async (path: string): Promise<string[]> => {
   try {
     const git = createGit(path);
     const root = await git('rev-parse', '--show-toplevel');
@@ -19,4 +20,4 @@ export async function getGitIgnored(path: string): Promise<string[]> {
   } catch (error) {
     return [];
   }
-}
+};

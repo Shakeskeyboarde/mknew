@@ -1,12 +1,13 @@
 import nodeFs from 'node:fs/promises';
-import { getGitIgnored } from '../git/getGitIgnored';
-import { getFiles } from './getFiles';
 
-jest.mock('node:fs/promises', () => ({ stat: jest.fn(), readdir: jest.fn() }));
+import { getGitIgnored } from '../git/get-git-ignored';
+import { getFiles } from './get-files';
+
+jest.mock('node:fs/promises', () => ({ readdir: jest.fn(), stat: jest.fn() }));
 
 jest.mock('../git/getGitIgnored', () => ({ getGitIgnored: jest.fn() }));
 
-async function toArrayFromAsyncGen<T>(generator: AsyncGenerator<T>): Promise<T[]> {
+const toArrayFromAsyncGen = async <T>(generator: AsyncGenerator<T>): Promise<T[]> => {
   const values: T[] = [];
 
   for await (const value of generator) {
@@ -14,7 +15,7 @@ async function toArrayFromAsyncGen<T>(generator: AsyncGenerator<T>): Promise<T[]
   }
 
   return values;
-}
+};
 
 describe('getFilenames', () => {
   const statMock = nodeFs.stat as jest.Mock;
@@ -29,9 +30,9 @@ describe('getFilenames', () => {
 
   test('files only', async () => {
     readdirMock.mockResolvedValueOnce([
-      { name: 'a', isDirectory: () => false },
-      { name: 'b', isDirectory: () => false },
-      { name: 'c', isDirectory: () => false },
+      { isDirectory: () => false, name: 'a' },
+      { isDirectory: () => false, name: 'b' },
+      { isDirectory: () => false, name: 'c' },
     ]);
     expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
@@ -45,11 +46,11 @@ Array [
   test('files first', async () => {
     readdirMock
       .mockResolvedValueOnce([
-        { name: 'a', isDirectory: () => false },
-        { name: 'b', isDirectory: () => true },
-        { name: 'c', isDirectory: () => false },
+        { isDirectory: () => false, name: 'a' },
+        { isDirectory: () => true, name: 'b' },
+        { isDirectory: () => false, name: 'c' },
       ])
-      .mockResolvedValueOnce([{ name: 'd', isDirectory: () => false }]);
+      .mockResolvedValueOnce([{ isDirectory: () => false, name: 'd' }]);
     expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
   "a",
@@ -62,16 +63,16 @@ Array [
   test('nested', async () => {
     readdirMock
       .mockResolvedValueOnce([
-        { name: 'a', isDirectory: () => false },
-        { name: 'b', isDirectory: () => true },
-        { name: 'c', isDirectory: () => true },
+        { isDirectory: () => false, name: 'a' },
+        { isDirectory: () => true, name: 'b' },
+        { isDirectory: () => true, name: 'c' },
       ])
       .mockResolvedValueOnce([
-        { name: 'd', isDirectory: () => true },
-        { name: 'e', isDirectory: () => false },
+        { isDirectory: () => true, name: 'd' },
+        { isDirectory: () => false, name: 'e' },
       ])
-      .mockResolvedValueOnce([{ name: 'f', isDirectory: () => false }])
-      .mockResolvedValueOnce([{ name: 'g', isDirectory: () => false }]);
+      .mockResolvedValueOnce([{ isDirectory: () => false, name: 'f' }])
+      .mockResolvedValueOnce([{ isDirectory: () => false, name: 'g' }]);
     expect(await toArrayFromAsyncGen(getFiles('root'))).toMatchInlineSnapshot(`
 Array [
   "a",

@@ -1,11 +1,12 @@
-import nodeReadline from 'node:readline';
 import chalk from 'chalk';
-import { InputInterruptError } from './InputInterruptError';
+import nodeReadline from 'node:readline';
+
+import { InputInterruptError } from './input-interrupt-error';
 
 /**
  * Get input on the command line interactively.
  */
-export async function getInput(message: string): Promise<string> {
+export const getInput = async (message: string): Promise<string> => {
   const readline = nodeReadline.createInterface(process.stdin, process.stdout);
   const promptMessage = message.trim().replace(/[=:.!?]?$/iu, (match) => match || ':');
 
@@ -20,4 +21,4 @@ export async function getInput(message: string): Promise<string> {
       reject(new InputInterruptError());
     });
   });
-}
+};

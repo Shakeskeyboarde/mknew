@@ -1,10 +1,11 @@
 import nodeFs from 'node:fs/promises';
-import { parseGitSource } from './git/parseGitSource';
-import { cloneGitRepo } from './git/cloneGitRepo';
-import { printUsage } from './io/printUsage';
-import { copyTemplate } from './template/copyTemplate';
-import { main } from './main';
+
 import { printError } from '.';
+import { cloneGitRepo } from './git/clone-git-repo';
+import { parseGitSource } from './git/parse-git-source';
+import { printUsage } from './io/print-usage';
+import { main } from './main';
+import { copyTemplate } from './template/copy-template';
 
 jest.mock('node:fs/promises', () => ({ rm: jest.fn() }));
 jest.mock('./io/printUsage', () => ({ printUsage: jest.fn() }));
@@ -50,18 +51,18 @@ describe('main', () => {
   });
 
   test('repo', async () => {
-    const source = { url: 'foo', path: 'bar', branch: 'baz' };
+    const source = { branch: 'baz', path: 'bar', url: 'foo' };
     (parseGitSource as jest.Mock).mockReturnValueOnce(source);
     (cloneGitRepo as jest.Mock).mockResolvedValueOnce('temp');
     await main(['template', 'target']);
     expect(cloneGitRepo).toHaveBeenCalledWith(source, 'template');
-    expect(nodeFs.rm).toHaveBeenCalledWith('temp', expect.objectContaining({ recursive: true, force: true }));
+    expect(nodeFs.rm).toHaveBeenCalledWith('temp', expect.objectContaining({ force: true, recursive: true }));
     expect(copyTemplate).toHaveBeenCalledWith('temp/bar/template', 'target', expect.any(Function));
   });
 
   test('throw', async () => {
-    const error = Error();
-    const source = { url: 'foo', path: 'bar', branch: 'baz' };
+    const error = new Error('error');
+    const source = { branch: 'baz', path: 'bar', url: 'foo' };
     (parseGitSource as jest.Mock).mockReturnValueOnce(source);
     (cloneGitRepo as jest.Mock).mockResolvedValueOnce('temp');
     (copyTemplate as jest.Mock).mockRejectedValue(error);
@@ -69,6 +70,6 @@ describe('main', () => {
     expect(cloneGitRepo).toHaveBeenCalledWith(source, 'template');
     expect(copyTemplate).toHaveBeenCalledWith('temp/bar/template', 'target', expect.any(Function));
     expect(printError).toHaveBeenCalledWith(error);
-    expect(nodeFs.rm).toHaveBeenCalledWith('temp', expect.objectContaining({ recursive: true, force: true }));
+    expect(nodeFs.rm).toHaveBeenCalledWith('temp', expect.objectContaining({ force: true, recursive: true }));
   });
 });

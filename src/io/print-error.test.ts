@@ -1,4 +1,4 @@
-import { printError } from './printError';
+import { printError } from './print-error';
 
 describe('printError', () => {
   const messages: unknown[] = [];
@@ -27,7 +27,7 @@ Array [
   });
 
   test('Error', () => {
-    printError(Error('message'));
+    printError(new Error('message'));
     expect(messages).toMatchInlineSnapshot(`
 Array [
   Array [

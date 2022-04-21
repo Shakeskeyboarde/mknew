@@ -1,6 +1,7 @@
 import nodeFs from 'node:fs/promises';
 import nodePath from 'node:path';
-import { getGitIgnored } from '../git/getGitIgnored';
+
+import { getGitIgnored } from '../git/get-git-ignored';
 
 /**
  * Iterate over all files (not directories) starting at root.
@@ -8,7 +9,7 @@ import { getGitIgnored } from '../git/getGitIgnored';
  * Files matched by `.gitignore` are skipped (_only_ when `root` is tracked by
  * Git).
  */
-export async function* getFiles(path: string): AsyncGenerator<string, void> {
+export const getFiles = async function* (path: string): AsyncGenerator<string, void> {
   const stats = await nodeFs.stat(path);
 
   if (!stats.isDirectory()) {
@@ -18,7 +19,7 @@ export async function* getFiles(path: string): AsyncGenerator<string, void> {
 
   const ignored = await getGitIgnored(path);
 
-  async function* ls(subPath: string): AsyncGenerator<string, void> {
+  const ls = async function* (subPath: string): AsyncGenerator<string, void> {
     const entries = await nodeFs.readdir(nodePath.join(path, subPath), { withFileTypes: true });
     const directories: string[] = [];
 
@@ -39,7 +40,7 @@ export async function* getFiles(path: string): AsyncGenerator<string, void> {
     for (const directory of directories) {
       yield* ls(directory);
     }
-  }
+  };
 
   yield* ls('.');
-}
+};

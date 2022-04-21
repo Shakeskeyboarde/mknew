@@ -1,10 +1,11 @@
 import nodeFs from 'node:fs/promises';
-import { isSystemError } from '../utilities/isSystemError';
+
+import { isSystemError } from '../utilities/is-system-error';
 
 /**
  * Asynchronous version of `fs.exists`.
  */
-export async function isExistingPath(path: string): Promise<boolean> {
+export const isExistingPath = async (path: string): Promise<boolean> => {
   return nodeFs
     .stat(path)
     .then(() => true)
@@ -15,4 +16,4 @@ export async function isExistingPath(path: string): Promise<boolean> {
 
       throw error;
     });
-}
+};

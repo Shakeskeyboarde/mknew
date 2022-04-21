@@ -1,4 +1,4 @@
-import { printWarning } from './printWarning';
+import { printWarning } from './print-warning';
 
 describe('printWarning', () => {
   const messages: unknown[] = [];
@@ -27,7 +27,7 @@ Array [
   });
 
   test('Error', () => {
-    printWarning(Error('message'));
+    printWarning(new Error('message'));
     expect(messages).toMatchInlineSnapshot(`
 Array [
   Array [

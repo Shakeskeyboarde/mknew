@@ -1,16 +1,16 @@
 import nodeOs from 'node:os';
 
-export interface ConcurrencyOptions {
+export type ConcurrencyOptions = {
   readonly concurrency?: number;
   readonly onError?: (error: unknown) => Promise<void>;
-}
+};
 
 /**
  * Run all async task functions with limited concurrency.
  *
  * Default concurrency is CPU count + 1.
  */
-export async function runTasks(
+export const runTasks = async (
   tasks: readonly (() => Promise<void>)[],
   {
     concurrency = nodeOs.cpus().length + 1,
@@ -18,7 +18,7 @@ export async function runTasks(
       throw error;
     },
   }: ConcurrencyOptions = {},
-): Promise<void> {
+): Promise<void> => {
   const active = new Set<Promise<void>>();
 
   concurrency = Math.max(1, Math.ceil(concurrency));
@@ -27,7 +27,8 @@ export async function runTasks(
     const promise = task().catch(onError);
 
     active.add(promise);
-    promise.then(() => active.delete(promise));
+
+    void promise.then(() => active.delete(promise));
 
     if (active.size >= concurrency) {
       await Promise.any([...active]);
@@ -35,4 +36,4 @@ export async function runTasks(
   }
 
   await Promise.all([...active]);
-}
+};

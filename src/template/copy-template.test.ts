@@ -1,16 +1,17 @@
+import { isText } from 'istextorbinary';
 import nodeFs from 'node:fs/promises';
 import nodePath from 'node:path';
-import { isText } from 'istextorbinary';
-import { isExistingPath } from '../filesystem/isExistingPath';
-import { getFiles } from '../filesystem/getFiles';
-import { getInput } from '../io/getInput';
-import { copyTemplate } from './copyTemplate';
+
+import { getFiles } from '../filesystem/get-files';
+import { isExistingPath } from '../filesystem/is-existing-path';
+import { getInput } from '../io/get-input';
+import { copyTemplate } from './copy-template';
 
 jest.mock('node:fs/promises', () => ({
-  readFile: jest.fn(),
-  writeFile: jest.fn(),
   copyFile: jest.fn(),
   mkdir: jest.fn(),
+  readFile: jest.fn(),
+  writeFile: jest.fn(),
 }));
 jest.mock('istextorbinary', () => ({
   isText: jest.fn(),
@@ -24,11 +25,15 @@ jest.mock('../filesystem/isExistingPath', () => ({
 jest.mock('../io/getInput', () => ({
   getInput: jest.fn(),
 }));
+jest.mock('../git/createGit', () => ({
+  // eslint-disable-next-line unicorn/consistent-function-scoping
+  createGit: () => async (_: unknown, config: string) => config.includes('name') ? 'John' : 'john@email.com',
+}));
 
 describe('applyTemplate', () => {
   const files = new Map<string, string>();
 
-  let inputs: unknown[] = [];
+  const inputs: unknown[] = [];
   let written: [string, ...unknown[]][] = [];
   let copied: [string, ...unknown[]][] = [];
   let mkdirs: [string, ...unknown[]][] = [];
@@ -179,7 +184,7 @@ Array [
     files.set('from/a', '');
     files.set('from/b/a', '');
     files.set('from/b/b', '');
-    const error = Object.assign(Error(), { code: 'FOO', path: 'to/b' });
+    const error = Object.assign(new Error('error'), { code: 'FOO', path: 'to/b' });
     (nodeFs.mkdir as jest.Mock).mockImplementation(async (path, ...args) => {
       mkdirs.push([path, ...args]);
 
@@ -187,12 +192,12 @@ Array [
         throw error;
       }
     });
-    const onError = jest.fn();
+    const localOnError = jest.fn();
 
-    await copyTemplate('from', 'to', onError);
+    await copyTemplate('from', 'to', localOnError);
 
-    expect(onError).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenLastCalledWith(error);
+    expect(localOnError).toHaveBeenCalledTimes(1);
+    expect(localOnError).toHaveBeenLastCalledWith(error);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`Array []`);
     expect(mkdirs.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
 Array [
@@ -221,21 +226,21 @@ Array [
   test('write file error', async () => {
     files.set('from/a', '{{{1}}}');
     files.set('from/b', '{{{1}}}');
-    const onError = jest.fn();
-    const error = Error();
+    const localOnError = jest.fn();
+    const error = new Error('error');
     (nodeFs.writeFile as jest.Mock).mockImplementation(async (path, ...args) => {
       written.push([path, ...args]);
       if (path === 'to/a') {
         throw error;
       } else if (path === 'to/b') {
-        throw Object.assign(Error('exists'), { code: 'EEXIST' });
+        throw Object.assign(new Error('exists'), { code: 'EEXIST' });
       }
     });
 
-    await copyTemplate('from', 'to', onError);
+    await copyTemplate('from', 'to', localOnError);
 
-    expect(onError).toHaveBeenCalledTimes(1);
-    expect(onError).toHaveBeenLastCalledWith(error);
+    expect(localOnError).toHaveBeenCalledTimes(1);
+    expect(localOnError).toHaveBeenLastCalledWith(error);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
 Array [
   Array [
@@ -258,7 +263,7 @@ Array [
 
   test('built-in prompts', async () => {
     new Date().getFullYear();
-    files.set('from/a', '{{{&template}}} {{{&target}}} {{{&year}}}');
+    files.set('from/a', '{{{&template}}} {{{&target}}} {{{&year}}} {{{&name}}} {{{&email}}}');
 
     await copyTemplate('from.foo', 'to.bar', onError);
 
@@ -268,6 +273,29 @@ Array [
   Array [
     "from/a",
     "from to ${new Date().getFullYear()}",
+    Object {
+      "flag": "wx",
+    },
+  ],
+]
+`);
+  });
+
+  test('alternative built-in prompts', async () => {
+    new Date().getFullYear();
+    files.set(
+      'from/a',
+      '~~~template.basename~~~ ~~~target.basename~~~ ~~~date.year~~~ ~~~git.user.name~~~ ~~~git.user.email~~~',
+    );
+
+    await copyTemplate('from.foo', 'to.bar', onError);
+
+    expect(getInput).toHaveBeenCalledTimes(0);
+    expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "from/a",
+    "from to 2022 John john@email.com",
     Object {
       "flag": "wx",
     },

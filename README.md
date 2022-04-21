@@ -2,7 +2,7 @@
 
 Stupidly simple scaffolding.
 
-Recursively copy a template file or directory. Input prompts are displayed when placeholders are found in text files (eg. `{{{placeholder}}}`), and the entered value is used as a literal replacement (no escaping). Empty directories and Git ignored paths are skipped.
+Recursively copy a template file or directory. Input prompts are displayed when placeholders are found in text files (eg. `{{{placeholder}}}` or `~~~placeholder~~~`), and the entered value is used as a literal replacement (no escaping). Empty directories and Git ignored paths are skipped.
 
 **Try it out** by creating an SPA (single page application) using the following one-liner.
 
@@ -40,7 +40,7 @@ npx mknew [-s <source>] [-w <workspace>] <template> <target>
 
 A template can be a single file or a whole directory. Directories are copied recursively.
 
-Any text file can contain template placeholders, which are "prompt" strings surrounded by triple curly braces (eg. `{{{prompt}}}`). The first time a unique template placeholder is encountered, the user will be prompted to enter a value. All placeholders will be replaced in copied text files.
+Any text file can contain template placeholders, which are "prompt" strings surrounded by triple curly braces or triple tildes (eg. `{{{prompt}}}` or `~~~prompt~~~`). The first time a unique template placeholder is encountered, the user will be prompted to enter a value. All placeholders will be replaced in copied text files.
 
 Example: `templates/foo/data.json`
 
@@ -70,20 +70,22 @@ And now `packages/bar/data.json` exists, and contains the following content.
 
 Values are used as entered, without any escaping.
 
-### Built-in Placeholders
+### Built-in Prompts
 
-There are some special built-in placeholders which are replaced with generated values. The user is not prompted for these values.
+There are some special built-in prompts which are replaced with generated values. The user is not actually prompted for these values.
 
-- `{{{&template}}}`
+- `{{{template.basename}}}`
   - The basename (without extension) of the template path
-- `{{{&target}}}`
+- `{{{target.basename}}}`
   - The basename (without extension) of the target path
-- `{{{&year}}}`
+- `{{{date.year}}}`
   - The current year (4-digit, local).
-- `{{{&name}}}`
+- `{{{git.user.name}}}`
   - The Git config `user.name` value.
-- `{{{&email}}}`
+- `{{{git.user.email}}}`
   - The Git config `user.email` value.
+
+These also work with tilde markers, for example: `~~~git.user.email~~~`
 
 ## Git Sources
 
