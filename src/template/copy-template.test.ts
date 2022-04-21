@@ -16,16 +16,16 @@ jest.mock('node:fs/promises', () => ({
 jest.mock('istextorbinary', () => ({
   isText: jest.fn(),
 }));
-jest.mock('../filesystem/getFiles', () => ({
+jest.mock('../filesystem/get-files', () => ({
   getFiles: jest.fn(),
 }));
-jest.mock('../filesystem/isExistingPath', () => ({
+jest.mock('../filesystem/is-existing-path', () => ({
   isExistingPath: jest.fn(),
 }));
-jest.mock('../io/getInput', () => ({
+jest.mock('../io/get-input', () => ({
   getInput: jest.fn(),
 }));
-jest.mock('../git/createGit', () => ({
+jest.mock('../git/create-git', () => ({
   // eslint-disable-next-line unicorn/consistent-function-scoping
   createGit: () => async (_: unknown, config: string) => config.includes('name') ? 'John' : 'john@email.com',
 }));
@@ -101,82 +101,82 @@ describe('applyTemplate', () => {
     await copyTemplate('from', 'to', onError);
 
     expect(inputs).toMatchInlineSnapshot(`
-Array [
-  "1",
-  "2",
-]
-`);
+      Array [
+        "1",
+        "2",
+      ]
+    `);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "to/a",
-    "a:(input-1)",
-    Object {
-      "flag": "wx",
-    },
-  ],
-  Array [
-    "to/b",
-    "b:(input-1)(input-2)",
-    Object {
-      "flag": "wx",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          "to/a",
+          "a:(input-1)",
+          Object {
+            "flag": "wx",
+          },
+        ],
+        Array [
+          "to/b",
+          "b:(input-1)(input-2)",
+          Object {
+            "flag": "wx",
+          },
+        ],
+      ]
+    `);
     expect(copied.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "from/c",
-    "to/c",
-    1,
-  ],
-  Array [
-    "from/d/a",
-    "to/d/a",
-    1,
-  ],
-  Array [
-    "from/d/b",
-    "to/d/b",
-    1,
-  ],
-]
-`);
+      Array [
+        Array [
+          "from/c",
+          "to/c",
+          1,
+        ],
+        Array [
+          "from/d/a",
+          "to/d/a",
+          1,
+        ],
+        Array [
+          "from/d/b",
+          "to/d/b",
+          1,
+        ],
+      ]
+    `);
     expect(mkdirs.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "to",
-    Object {
-      "recursive": true,
-    },
-  ],
-  Array [
-    "to",
-    Object {
-      "recursive": true,
-    },
-  ],
-  Array [
-    "to",
-    Object {
-      "recursive": true,
-    },
-  ],
-  Array [
-    "to/d",
-    Object {
-      "recursive": true,
-    },
-  ],
-  Array [
-    "to/d",
-    Object {
-      "recursive": true,
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          "to",
+          Object {
+            "recursive": true,
+          },
+        ],
+        Array [
+          "to",
+          Object {
+            "recursive": true,
+          },
+        ],
+        Array [
+          "to",
+          Object {
+            "recursive": true,
+          },
+        ],
+        Array [
+          "to/d",
+          Object {
+            "recursive": true,
+          },
+        ],
+        Array [
+          "to/d",
+          Object {
+            "recursive": true,
+          },
+        ],
+      ]
+    `);
     expect(errors).toMatchInlineSnapshot(`Array []`);
   });
 
@@ -200,27 +200,27 @@ Array [
     expect(localOnError).toHaveBeenLastCalledWith(error);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`Array []`);
     expect(mkdirs.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "to",
-    Object {
-      "recursive": true,
-    },
-  ],
-  Array [
-    "to/b",
-    Object {
-      "recursive": true,
-    },
-  ],
-  Array [
-    "to/b",
-    Object {
-      "recursive": true,
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          "to",
+          Object {
+            "recursive": true,
+          },
+        ],
+        Array [
+          "to/b",
+          Object {
+            "recursive": true,
+          },
+        ],
+        Array [
+          "to/b",
+          Object {
+            "recursive": true,
+          },
+        ],
+      ]
+    `);
   });
 
   test('write file error', async () => {
@@ -242,23 +242,23 @@ Array [
     expect(localOnError).toHaveBeenCalledTimes(1);
     expect(localOnError).toHaveBeenLastCalledWith(error);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "to/a",
-    "(input-1)",
-    Object {
-      "flag": "wx",
-    },
-  ],
-  Array [
-    "to/b",
-    "(input-1)",
-    Object {
-      "flag": "wx",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          "to/a",
+          "(input-1)",
+          Object {
+            "flag": "wx",
+          },
+        ],
+        Array [
+          "to/b",
+          "(input-1)",
+          Object {
+            "flag": "wx",
+          },
+        ],
+      ]
+    `);
   });
 
   test('built-in prompts', async () => {
@@ -269,16 +269,16 @@ Array [
 
     expect(getInput).toHaveBeenCalledTimes(0);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "from/a",
-    "from to ${new Date().getFullYear()}",
-    Object {
-      "flag": "wx",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          "from/a",
+          "from to 2022 John john@email.com",
+          Object {
+            "flag": "wx",
+          },
+        ],
+      ]
+    `);
   });
 
   test('alternative built-in prompts', async () => {
@@ -292,15 +292,15 @@ Array [
 
     expect(getInput).toHaveBeenCalledTimes(0);
     expect(written.sort((a, b) => a[0].localeCompare(b[0]))).toMatchInlineSnapshot(`
-Array [
-  Array [
-    "from/a",
-    "from to 2022 John john@email.com",
-    Object {
-      "flag": "wx",
-    },
-  ],
-]
-`);
+      Array [
+        Array [
+          "from/a",
+          "from to 2022 John john@email.com",
+          Object {
+            "flag": "wx",
+          },
+        ],
+      ]
+    `);
   });
 });

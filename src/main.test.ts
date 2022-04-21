@@ -8,12 +8,12 @@ import { main } from './main';
 import { copyTemplate } from './template/copy-template';
 
 jest.mock('node:fs/promises', () => ({ rm: jest.fn() }));
-jest.mock('./io/printUsage', () => ({ printUsage: jest.fn() }));
-jest.mock('./io/printError', () => ({ printError: jest.fn() }));
-jest.mock('./io/printWarning', () => ({ printWarning: jest.fn() }));
-jest.mock('./git/parseGitSource', () => ({ parseGitSource: jest.fn() }));
-jest.mock('./git/cloneGitRepo', () => ({ cloneGitRepo: jest.fn() }));
-jest.mock('./template/copyTemplate', () => ({ copyTemplate: jest.fn() }));
+jest.mock('./io/print-usage', () => ({ printUsage: jest.fn() }));
+jest.mock('./io/print-error', () => ({ printError: jest.fn() }));
+jest.mock('./io/print-warning', () => ({ printWarning: jest.fn() }));
+jest.mock('./git/parse-git-source', () => ({ parseGitSource: jest.fn() }));
+jest.mock('./git/clone-git-repo', () => ({ cloneGitRepo: jest.fn() }));
+jest.mock('./template/copy-template', () => ({ copyTemplate: jest.fn() }));
 
 describe('main', () => {
   beforeEach(() => {

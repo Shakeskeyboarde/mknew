@@ -5,7 +5,7 @@ import { getFiles } from './get-files';
 
 jest.mock('node:fs/promises', () => ({ readdir: jest.fn(), stat: jest.fn() }));
 
-jest.mock('../git/getGitIgnored', () => ({ getGitIgnored: jest.fn() }));
+jest.mock('../git/get-git-ignored', () => ({ getGitIgnored: jest.fn() }));
 
 const toArrayFromAsyncGen = async <T>(generator: AsyncGenerator<T>): Promise<T[]> => {
   const values: T[] = [];
